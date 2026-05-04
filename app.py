@@ -6,7 +6,12 @@ import threading
 
 app = Flask(__name__)
 
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
+# ✔ CORRETO PARA PRODUÇÃO
+socketio = SocketIO(
+    app,
+    cors_allowed_origins="*",
+    async_mode="eventlet"
+)
 
 ativo_global = "PETR4.SA"
 
@@ -22,7 +27,7 @@ def home():
 # ---------------------------
 def to_float(valor):
     try:
-        if hasattr(valor, "iloc"):  # Series
+        if hasattr(valor, "iloc"):
             return float(valor.iloc[0])
         return float(valor)
     except:
@@ -52,15 +57,7 @@ def atualizar_dados():
         except Exception as e:
             print("Erro thread:", e)
 
-        time.sleep(3)
-
-# ---------------------------
-# THREAD START
-# ---------------------------
-def iniciar_thread():
-    thread = threading.Thread(target=atualizar_dados)
-    thread.daemon = True
-    thread.start()
+        socketio.sleep(3)  # ✔ IMPORTANTE (em vez de time.sleep)
 
 # ---------------------------
 # TROCAR ATIVO
@@ -71,12 +68,20 @@ def set_ativo(data):
     ativo_global = data["ativo"]
 
 # ---------------------------
-# RUN
+# START THREAD
+# ---------------------------
+def iniciar_thread():
+    thread = threading.Thread(target=atualizar_dados)
+    thread.daemon = True
+    thread.start()
+
+# ---------------------------
+# RUN (CORRIGIDO PARA RENDER)
 # ---------------------------
 if __name__ == "__main__":
+    iniciar_thread()
     socketio.run(
         app,
         host="0.0.0.0",
-        port=10000,
-        allow_unsafe_werkzeug=True
+        port=10000
     )
