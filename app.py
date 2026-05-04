@@ -74,5 +74,9 @@ def set_ativo(data):
 # RUN
 # ---------------------------
 if __name__ == "__main__":
-    iniciar_thread()
-    socketio.run(app, host="0.0.0.0", port=10000)
+    socketio.run(
+        app,
+        host="0.0.0.0",
+        port=10000,
+        allow_unsafe_werkzeug=True
+    )
