@@ -1,12 +1,11 @@
 from flask import Flask, render_template
 from flask_socketio import SocketIO
 from dados import pegar_dados
-import time
 import threading
 
 app = Flask(__name__)
 
-# ✔ CORRETO PARA PRODUÇÃO
+# ✔ CONFIGURAÇÃO CORRETA PARA RENDER
 socketio = SocketIO(
     app,
     cors_allowed_origins="*",
@@ -57,7 +56,8 @@ def atualizar_dados():
         except Exception as e:
             print("Erro thread:", e)
 
-        socketio.sleep(3)  # ✔ IMPORTANTE (em vez de time.sleep)
+        # ✔ correto para eventlet
+        socketio.sleep(3)
 
 # ---------------------------
 # TROCAR ATIVO
@@ -76,7 +76,7 @@ def iniciar_thread():
     thread.start()
 
 # ---------------------------
-# RUN (CORRIGIDO PARA RENDER)
+# RUN (RENDER)
 # ---------------------------
 if __name__ == "__main__":
     iniciar_thread()
