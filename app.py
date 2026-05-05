@@ -40,14 +40,40 @@ def atualizar_dados():
 
     while True:
         try:
-            print("ENVIANDO DADOS...")
-
             df, suporte, resistencia, sinal = pegar_dados(ativo_global)
 
             if df is not None and not df.empty:
 
                 dados_df = df.tail(50).reset_index()
 
+                socketio.emit("dados", {
+                    "sinal": sinal,
+                    "suporte": to_float(suporte),
+                    "resistencia": to_float(resistencia),
+                    "df": dados_df.to_dict(orient="records")
+                })
+
+            else:
+                # 👇 ENVIA MESMO SEM DADOS
+                socketio.emit("dados", {
+                    "sinal": "SEM DADOS (Yahoo bloqueou)",
+                    "suporte": 0,
+                    "resistencia": 0,
+                    "df": []
+                })
+
+        except Exception as e:
+            print("Erro thread:", e)
+
+            # 👇 ENVIA ERRO PRA TELA
+            socketio.emit("dados", {
+                "sinal": "ERRO API",
+                "suporte": 0,
+                "resistencia": 0,
+                "df": []
+            })
+
+        socketio.sleep(15)  # 🔥 diminui chamadas (evita bloqueio)
                 socketio.emit("dados", {
                     "sinal": sinal,
                     "suporte": to_float(suporte),
