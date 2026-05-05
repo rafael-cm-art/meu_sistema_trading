@@ -30,6 +30,6 @@ def pegar_dados(ativo):
         sinal = "⏸️ NEUTRO"
 
     return df, suporte, resistencia, sinal
-=======
+
     return df, suporte, resistencia, sinal
 
