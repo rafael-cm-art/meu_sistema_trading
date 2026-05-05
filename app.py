@@ -5,7 +5,7 @@ import threading
 
 app = Flask(__name__)
 
-# ✔ CONFIGURAÇÃO CORRETA PARA RENDER
+# ✔ CONFIGURAÇÃO PARA RENDER
 socketio = SocketIO(
     app,
     cors_allowed_origins="*",
@@ -43,7 +43,6 @@ def atualizar_dados():
             df, suporte, resistencia, sinal = pegar_dados(ativo_global)
 
             if df is not None and not df.empty:
-
                 dados_df = df.tail(50).reset_index()
 
                 socketio.emit("dados", {
@@ -54,7 +53,6 @@ def atualizar_dados():
                 })
 
             else:
-                # 👇 ENVIA MESMO SEM DADOS
                 socketio.emit("dados", {
                     "sinal": "SEM DADOS (Yahoo bloqueou)",
                     "suporte": 0,
@@ -65,7 +63,6 @@ def atualizar_dados():
         except Exception as e:
             print("Erro thread:", e)
 
-            # 👇 ENVIA ERRO PRA TELA
             socketio.emit("dados", {
                 "sinal": "ERRO API",
                 "suporte": 0,
@@ -73,27 +70,7 @@ def atualizar_dados():
                 "df": []
             })
 
-        socketio.sleep(15)  # 🔥 diminui chamadas (evita bloqueio)
-                socketio.emit("dados", {
-                    "sinal": sinal,
-                    "suporte": to_float(suporte),
-                    "resistencia": to_float(resistencia),
-                    "df": dados_df.to_dict(orient="records")
-                })
-
-            else:
-                # fallback pra não travar tela
-                socketio.emit("dados", {
-                    "sinal": "SEM DADOS",
-                    "suporte": 0,
-                    "resistencia": 0,
-                    "df": []
-                })
-
-        except Exception as e:
-            print("Erro thread:", e)
-
-        socketio.sleep(10)
+        socketio.sleep(15)
 
 # ---------------------------
 # TROCAR ATIVO
@@ -112,7 +89,7 @@ def iniciar_thread():
     thread.start()
 
 # ---------------------------
-# RUN (RENDER)
+# RUN
 # ---------------------------
 if __name__ == "__main__":
     iniciar_thread()
