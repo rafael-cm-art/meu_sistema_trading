@@ -5,7 +5,6 @@ import threading
 
 app = Flask(__name__)
 
-# ✔ CONFIGURAÇÃO PARA RENDER
 socketio = SocketIO(
     app,
     cors_allowed_origins="*",
@@ -22,23 +21,18 @@ def home():
     return render_template("index.html")
 
 # ---------------------------
-# FUNÇÃO SEGURA PARA FLOAT
+# FUNÇÃO FLOAT
 # ---------------------------
-def atualizar_dados():
-    while True:
-        print("ENVIANDO TESTE...")
-
-        socketio.emit("dados", {
-            "sinal": "FUNCIONANDO",
-            "suporte": 123,
-            "resistencia": 456,
-            "df": []
-        })
-
-        socketio.sleep(5)
+def to_float(valor):
+    try:
+        if hasattr(valor, "iloc"):
+            return float(valor.iloc[0])
+        return float(valor)
+    except:
+        return 0.0
 
 # ---------------------------
-# THREAD DE ATUALIZAÇÃO
+# THREAD
 # ---------------------------
 def atualizar_dados():
     global ativo_global
@@ -59,7 +53,7 @@ def atualizar_dados():
 
             else:
                 socketio.emit("dados", {
-                    "sinal": "SEM DADOS (Yahoo bloqueou)",
+                    "sinal": "SEM DADOS",
                     "suporte": 0,
                     "resistencia": 0,
                     "df": []
