@@ -42,22 +42,18 @@ def atualizar_dados():
         try:
             df, suporte, resistencia, sinal = pegar_dados(ativo_global)
 
-            if df is not None and not df.empty:
-
-                dados_df = df.tail(50).reset_index()
-
-                socketio.emit("dados", {
-                    "sinal": sinal,
-                    "suporte": to_float(suporte),
-                    "resistencia": to_float(resistencia),
-                    "df": dados_df.to_dict(orient="records")
-                })
+            socketio.emit("dados", {
+                "sinal": "TESTE",
+                "suporte": 0,
+                "resistencia": 0,
+                "df": []
+            })
 
         except Exception as e:
             print("Erro thread:", e)
 
         # ✔ correto para eventlet
-        socketio.sleep(3)
+        socketio.sleep(10)
 
 # ---------------------------
 # TROCAR ATIVO
