@@ -70,7 +70,7 @@ def atualizar_dados():
                 "df": []
             })
 
-        socketio.sleep(15)
+        socketio.sleep(30)
 
 # ---------------------------
 # TROCAR ATIVO
