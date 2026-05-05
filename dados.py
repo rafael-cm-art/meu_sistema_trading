@@ -1,35 +1,46 @@
-import yfinance as yf
+import requests
+import pandas as pd
+
+API_KEY = "SUA_API_KEY_AQUI"
 
 def pegar_dados(ativo):
-    df = yf.download(ativo, period="5d", interval="15m")
+    try:
+        url = f"https://api.twelvedata.com/time_series?symbol={ativo}&interval=1min&outputsize=50&apikey={API_KEY}"
 
-    if df is None or df.empty:
-        return df, 0.0, 0.0, "Sem dados"
+        response = requests.get(url)
+        data = response.json()
 
-    # 🔥 GARANTE DATA LIMPA (remove lixo do yfinance)
-    df = df.dropna()
+        if "values" not in data:
+            return None, 0, 0, "SEM DADOS"
 
-    # =========================
-    # 📊 SUPORTE / RESISTÊNCIA
-    # =========================
-    suporte = float(df["Low"].to_numpy().min())
-    resistencia = float(df["High"].to_numpy().max())
+        df = pd.DataFrame(data["values"])
 
-    # =========================
-    # 🎯 SINAL SIMPLES
-    # =========================
-    closes = df["Close"].tail(5).to_numpy()
+        # converter tipos
+        df["datetime"] = pd.to_datetime(df["datetime"])
+        df = df.sort_values("datetime")
 
-    if len(closes) < 5:
-        sinal = "Sem dados"
-    elif all(closes[i] > closes[i-1] for i in range(1, 5)):
-        sinal = "📈 COMPRA"
-    elif all(closes[i] < closes[i-1] for i in range(1, 5)):
-        sinal = "📉 VENDA"
-    else:
-        sinal = "⏸️ NEUTRO"
+        for col in ["open", "high", "low", "close"]:
+            df[col] = df[col].astype(float)
 
-    return df, suporte, resistencia, sinal
+        df.rename(columns={
+            "open": "Open",
+            "high": "High",
+            "low": "Low",
+            "close": "Close"
+        }, inplace=True)
 
-    return df, suporte, resistencia, sinal
+        # suporte e resistência simples
+        suporte = df["Low"].min()
+        resistencia = df["High"].max()
 
+        # sinal básico
+        ultimo = df["Close"].iloc[-1]
+        media = df["Close"].mean()
+
+        sinal = "COMPRA" if ultimo > media else "VENDA"
+
+        return df, suporte, resistencia, sinal
+
+    except Exception as e:
+        print("Erro API:", e)
+        return None, 0, 0, "ERRO"
