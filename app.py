@@ -24,13 +24,18 @@ def home():
 # ---------------------------
 # FUNÇÃO SEGURA PARA FLOAT
 # ---------------------------
-def to_float(valor):
-    try:
-        if hasattr(valor, "iloc"):
-            return float(valor.iloc[0])
-        return float(valor)
-    except:
-        return 0.0
+def atualizar_dados():
+    while True:
+        print("ENVIANDO TESTE...")
+
+        socketio.emit("dados", {
+            "sinal": "FUNCIONANDO",
+            "suporte": 123,
+            "resistencia": 456,
+            "df": []
+        })
+
+        socketio.sleep(5)
 
 # ---------------------------
 # THREAD DE ATUALIZAÇÃO
