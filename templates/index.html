@@ -18,8 +18,15 @@
 
 const socket = io();
 
-// 🔥 recebe dados em tempo real
+// 🔥 CONEXÃO
+socket.on("connect", () => {
+    console.log("✅ Conectado ao servidor");
+});
+
+// 🔥 DEBUG
 socket.on("dados", function(data) {
+
+    console.log("📡 Dados recebidos:", data);
 
     document.getElementById("sinal").innerText = data.sinal;
 
@@ -27,15 +34,17 @@ socket.on("dados", function(data) {
         "Suporte: " + data.suporte +
         " | Resistência: " + data.resistencia;
 
-    // reconstrói gráfico
-    let df = JSON.parse(data.df);
+    // 🔥 segurança: evita erro se df vier vazio
+    if (!data.df || data.df.length === 0) return;
+
+    let df = data.df;
 
     let trace = {
-        x: df.index,
-        open: df.Open,
-        high: df.High,
-        low: df.Low,
-        close: df.Close,
+        x: df.map(d => d.index),
+        open: df.map(d => d.Open),
+        high: df.map(d => d.High),
+        low: df.map(d => d.Low),
+        close: df.map(d => d.Close),
         type: 'candlestick'
     };
 

@@ -29,4 +29,8 @@ def pegar_dados(ativo):
     else:
         sinal = "⏸️ NEUTRO"
 
+<<<<<<< HEAD
     return df, suporte, resistencia, sinal
+=======
+    return df, suporte, resistencia, sinal
+>>>>>>> 4f4237d2b40cd060e6270999739c194d98fcd02a
